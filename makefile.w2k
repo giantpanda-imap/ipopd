@@ -6,65 +6,44 @@
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # ========================================================================
 
-# Program:	IMAP Toolkit Makefile for Windows 2000/XP
+
+# Program:	IPOPD Makefile for Windows 2000/XP
 #
 # Author:	Mark Crispin
 #
-# Date:		7 December 1989
-# Last Edited:	20 August 2006
+# Date:		28 October 1990
+# Last Edited:	30 August 2006
 
 
-IP=6
-COPY=copy
-CD=cd
-MAKE=nmake /nologo /f makefile.w2k IP=$(IP)
-MKDIR=mkdir
-RD=rmdir /s /q
+C = ..\c-client
+CCLIENTLIB = $C\cclient.lib
+LIBS = $(CCLIENTLIB) ws2_32.lib winmm.lib advapi32.lib secur32.lib crypt32.lib
+OSCOMPAT = /DWIN32
+VSCOMPAT = /D_CRT_SECURE_NO_DEPRECATE /D_CRT_NONSTDC_NO_DEPRECATE
+CFLAGS= -I$C /MT /W3 $(OSCOMPAT) $(VSCOMPAT) -nologo $(EXTRACFLAGS)
 
+ipopd: ipop2d ipop3d
 
-# Make the IMAP Toolkit
+ipop2d: $(CCLIENTLIB) ipop2d.obj
+	LINK /NOLOGO ipop2d.obj $(LIBS)
 
-build:	c-client mtest mailutil imapd ipopd
-	$(CD) c-client
-	$(MAKE)
-	$(CD) ..\mtest
-	$(MAKE)
-	$(CD) ..\mailutil
-	$(MAKE)
-	$(CD) ..\ipopd
-	$(MAKE)
-	$(CD) ..\imapd
-	$(MAKE)
-	$(CD) ..
+ipop3d: $(CCLIENTLIB) ipop3d.obj
+	LINK /NOLOGO ipop3d.obj $(LIBS)
 
-c-client:
-	$(MKDIR) c-client
-	$(COPY) src\c-client\*.* c-client
-	$(COPY) src\charset\*.* c-client
-	$(COPY) src\osdep\nt\*.* c-client
+ipop2d.obj: $C\mail.h $C\misc.h $C\osdep.h
 
-mtest:
-	$(MKDIR) mtest
-	$(COPY) src\mtest\*.* mtest
+ipop3d.obj: $C\mail.h $C\misc.h $C\osdep.h
 
-mailutil:
-	$(MKDIR) mailutil
-	$(COPY) src\mailutil\*.* mailutil
-
-ipopd:
-	$(MKDIR) ipopd
-	$(COPY) src\ipopd\*.* ipopd
-
-imapd:
-	$(MKDIR) imapd
-	$(COPY) src\imapd\*.* imapd
+$(CCLIENTLIB):
+	@echo Make c-client first
+	false
 
 clean:
-	$(RD) c-client mtest mailutil ipopd imapd
+	del *.obj *.exe *.lib *.exp || rem
 
 # A monument to a hack of long ago and far away...
 love:
-	@echo 'not war?'
+	@echo not war?
